@@ -1,7 +1,6 @@
 import streamlit as st
 import os
 import tempfile
-import pyperclip
 from audio_processor import AudioTranscriber
 from utils import get_supported_formats, format_transcription
 
@@ -11,95 +10,62 @@ st.set_page_config(
     layout="wide"
 )
 
-def show_transcription_modal(transcription):
-    """Display transcription in an elegant container with actions."""
-    st.write("---")
-    st.subheader("📝 Resultado de la Transcripción")
-
-    # Container for transcription
-    with st.container():
-        st.markdown(
-            f"""
-            <div style='background-color: #F0F2F6; padding: 20px; border-radius: 10px; margin: 10px 0;'>
-                {format_transcription(transcription)}
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        # Buttons for actions
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("📋 Copiar al Portapapeles", key="copy_btn", use_container_width=True):
-                pyperclip.copy(transcription)
-                st.success("¡Transcripción copiada al portapapeles! ✅")
-
-        with col2:
-            st.download_button(
-                label="⬇️ Descargar Transcripción",
-                data=transcription,
-                file_name="transcripcion.txt",
-                mime="text/plain",
-                key="download_btn",
-                use_container_width=True
-            )
-
 def main():
     st.title("🎙️ Audio to Text Transcription")
-
+    
     # Sidebar with supported formats
-    st.sidebar.header("Formatos Soportados")
+    st.sidebar.header("Supported Formats")
     supported_formats = get_supported_formats()
     st.sidebar.write(", ".join(supported_formats))
-
-    # Custom CSS
-    st.markdown("""
-    <style>
-    .stButton > button {
-        background-color: #FF4B4B;
-        color: white;
-    }
-    .stDownloadButton > button {
-        background-color: #FF4B4B;
-        color: white;
-    }
-    .stProgress .st-bo {
-        background-color: #FF4B4B;
-    }
-    div[data-testid="stFileUploader"] > section > input + div > button {
-        background-color: #FF4B4B;
-        color: white;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
+    
+    # File upload
     uploaded_file = st.file_uploader(
-        "Sube tu archivo de audio",
+        "Upload your audio file",
         type=supported_formats,
-        help="Sube un archivo de audio para transcribir"
+        help="Upload an audio file to transcribe"
     )
-
+    
     if uploaded_file is not None:
+        # Create a temporary file to store the uploaded audio
         with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(uploaded_file.name)[1]) as tmp_file:
             tmp_file.write(uploaded_file.getvalue())
             audio_path = tmp_file.name
-
+        
         try:
+            # Initialize transcriber
             transcriber = AudioTranscriber()
-
-            with st.spinner("🎵 Procesando archivo de audio..."):
-                transcription = transcriber.transcribe(audio_path)
-                st.success("✨ ¡Transcripción completada!")
-
-                # Show the transcription in the elegant container
-                show_transcription_modal(transcription)
-
+            
+            # Add progress bar
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+            
+            # Process transcription
+            status_text.text("Processing audio file...")
+            progress_bar.progress(25)
+            
+            transcription = transcriber.transcribe(audio_path)
+            progress_bar.progress(100)
+            status_text.text("Transcription completed!")
+            
+            # Display results
+            st.subheader("Transcription Result")
+            formatted_text = format_transcription(transcription)
+            st.markdown(formatted_text)
+            
+            # Download button
+            st.download_button(
+                label="Download Transcription",
+                data=transcription,
+                file_name="transcription.txt",
+                mime="text/plain"
+            )
+            
         except Exception as e:
-            st.error(f"❌ Ocurrió un error: {str(e)}")
-
+            st.error(f"An error occurred: {str(e)}")
+        
         finally:
             # Clean up temporary file
             os.unlink(audio_path)
-
+            
 if __name__ == "__main__":
     main()
