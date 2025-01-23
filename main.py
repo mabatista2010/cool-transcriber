@@ -67,6 +67,12 @@ st.markdown("""
     .key-points li {
         margin-bottom: 8px;
     }
+    .new-transcription-button {
+        display: flex;
+        justify-content: center;
+        margin-top: 1rem;
+        margin-bottom: 2rem;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -78,19 +84,19 @@ def clear_state():
 def main():
     st.title("🎙️ Audio to Text Transcription")
 
-    # Botón para nueva transcripción
-    col1, col2 = st.columns([6, 1])
-    with col2:
-        if st.button("🔄 Nueva transcripción"):
-            clear_state()
-            st.experimental_rerun()
-
     # File upload
     uploaded_file = st.file_uploader(
         "Upload your audio file",
         type=get_supported_formats(),
         help="Upload an audio file to transcribe"
     )
+
+    # Botón para nueva transcripción centrado
+    st.markdown("<div class='new-transcription-button'>", unsafe_allow_html=True)
+    if st.button("🔁 Nueva transcripción", use_container_width=False):
+        clear_state()
+        st.experimental_rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
 
     if uploaded_file is not None:
         # Crear archivo temporal
