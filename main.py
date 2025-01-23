@@ -5,7 +5,14 @@ import json
 from audio_processor import AudioTranscriber
 from utils import get_supported_formats, format_transcription, generate_summary
 
-# PWA Metadata and Service Worker
+# Configuración de la página
+st.set_page_config(
+    page_title="Audio Transcription App",
+    page_icon="🎙️",
+    layout="wide"
+)
+
+# PWA Metadata y Service Worker
 st.markdown("""
     <head>
         <link rel="manifest" href="/static/manifest.json">
@@ -28,13 +35,6 @@ st.markdown("""
         </script>
     </head>
 """, unsafe_allow_html=True)
-
-# Configuración de la página
-st.set_page_config(
-    page_title="Audio Transcription App",
-    page_icon="🎙️",
-    layout="wide"
-)
 
 # Estilos CSS personalizados
 st.markdown("""
@@ -77,6 +77,13 @@ def clear_state():
 
 def main():
     st.title("🎙️ Audio to Text Transcription")
+
+    # Botón para nueva transcripción
+    col1, col2 = st.columns([6, 1])
+    with col2:
+        if st.button("🔄 Nueva transcripción"):
+            clear_state()
+            st.experimental_rerun()
 
     # File upload
     uploaded_file = st.file_uploader(
