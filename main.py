@@ -101,15 +101,6 @@ def main():
             transcription = transcriber.transcribe(audio_path)
             progress_bar.progress(75)
 
-            # Generar resumen si el usuario lo solicita
-            generate_summary_option = st.checkbox("Generate AI Summary", value=False)
-
-            if generate_summary_option:
-                status_text.text("Generating summary...")
-                summary_json = generate_summary(transcription)
-                summary_data = json.loads(summary_json)
-                progress_bar.progress(90)
-
             progress_bar.progress(100)
             status_text.text("Processing completed!")
 
@@ -134,32 +125,40 @@ def main():
                 formatted_text = format_transcription(transcription)
                 st.markdown(formatted_text)
                 st.markdown("</div>", unsafe_allow_html=True)
-
                 st.markdown("</div>", unsafe_allow_html=True)
 
-            # Mostrar resumen si fue generado
-            if generate_summary_option and 'summary_data' in locals():
-                with st.expander("📋 AI Summary", expanded=True):
-                    st.markdown("<div class='summary-container'>", unsafe_allow_html=True)
+                # Botón para generar resumen al final de la transcripción
+                if st.button("🤖 Generate AI Summary"):
+                    status_text.text("Generating summary...")
+                    summary_json = generate_summary(transcription)
 
-                    st.subheader("🔍 Summary")
-                    st.write(summary_data['resumen'])
+                    try:
+                        summary_data = json.loads(summary_json)
 
-                    st.subheader("📌 Key Points")
-                    st.markdown("<ul class='key-points'>", unsafe_allow_html=True)
-                    for punto in summary_data['puntos_clave']:
-                        st.markdown(f"<li>{punto}</li>", unsafe_allow_html=True)
-                    st.markdown("</ul>", unsafe_allow_html=True)
+                        # Mostrar el resumen en un nuevo expander
+                        with st.expander("📋 AI Summary", expanded=True):
+                            st.markdown("<div class='summary-container'>", unsafe_allow_html=True)
 
-                    # Botón para descargar el resumen
-                    st.download_button(
-                        label="📥 Download Summary",
-                        data=summary_json,
-                        file_name="summary.json",
-                        mime="application/json"
-                    )
+                            st.subheader("🔍 Summary")
+                            st.write(summary_data['resumen'])
 
-                    st.markdown("</div>", unsafe_allow_html=True)
+                            st.subheader("📌 Key Points")
+                            st.markdown("<ul class='key-points'>", unsafe_allow_html=True)
+                            for punto in summary_data['puntos_clave']:
+                                st.markdown(f"<li>{punto}</li>", unsafe_allow_html=True)
+                            st.markdown("</ul>", unsafe_allow_html=True)
+
+                            # Botón para descargar el resumen
+                            st.download_button(
+                                label="📥 Download Summary",
+                                data=summary_json,
+                                file_name="summary.json",
+                                mime="application/json"
+                            )
+
+                            st.markdown("</div>", unsafe_allow_html=True)
+                    except json.JSONDecodeError:
+                        st.error("Error processing the summary response. Please try again.")
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
