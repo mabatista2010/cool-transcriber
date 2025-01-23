@@ -13,11 +13,12 @@ class AudioTranscriber:
         try:
             with open(audio_path, "rb") as audio_file:
                 # Use Whisper API to transcribe with auto language detection
-                transcription = self.client.audio.transcriptions.create(
+                response = self.client.audio.transcriptions.create(
                     model="whisper-1",
                     file=audio_file,
+                    response_format="text"
                 )
-                return transcription.text
+                return response
 
         except Exception as e:
             if "API key" in str(e):
