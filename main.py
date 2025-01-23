@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 import tempfile
+import pyperclip
 from audio_processor import AudioTranscriber
 from utils import get_supported_formats
 
@@ -47,18 +48,10 @@ def main():
                 key="transcription"
             )
 
-            col1, col2 = st.columns([1, 4])
-            with col1:
-                # Copy button without JavaScript
-                st.button("📋 Copiar", key="copy", help="Copiar texto al portapapeles")
-                if st.session_state.get("copy"):
-                    st.session_state["copy"] = False
-                    st.session_state["copied"] = True
-
-            with col2:
-                if st.session_state.get("copied", False):
-                    st.success("¡Texto copiado al portapapeles!")
-                    st.session_state["copied"] = False
+            # Copy button
+            if st.button("📋 Copiar"):
+                pyperclip.copy(transcription)
+                st.success("¡Texto copiado al portapapeles!")
 
             # Download button
             st.download_button(
