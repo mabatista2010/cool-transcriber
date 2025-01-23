@@ -13,21 +13,40 @@ class AudioTranscriber:
         Returns the path to the downloaded audio file.
         """
         try:
-            # Create YouTube object
-            yt = YouTube(url)
+            # Create YouTube object with custom user agent
+            yt = YouTube(
+                url,
+                use_oauth=False,
+                allow_oauth_cache=False
+            )
+
             # Get audio stream
-            audio_stream = yt.streams.filter(only_audio=True).first()
+            audio_stream = yt.streams.filter(only_audio=True, file_extension='mp4').first()
+
+            if not audio_stream:
+                raise Exception("No se encontró stream de audio disponible")
 
             # Create temporary file
             temp_dir = tempfile.mkdtemp()
             temp_path = os.path.join(temp_dir, "audio.mp4")
 
             # Download audio
+            print(f"Descargando audio de: {url}")
+            print(f"Título del video: {yt.title}")
+            print(f"Duración: {yt.length} segundos")
+
             audio_stream.download(output_path=temp_dir, filename="audio.mp4")
             return temp_path
 
         except Exception as e:
-            raise Exception(f"Error al descargar el audio de YouTube: {str(e)}")
+            if "429" in str(e):
+                raise Exception("Demasiadas solicitudes a YouTube. Por favor, intenta más tarde.")
+            elif "403" in str(e):
+                raise Exception("No se puede acceder al video. Asegúrate que el video sea público y accesible.")
+            elif "age restricted" in str(e).lower():
+                raise Exception("El video tiene restricción de edad y no puede ser procesado.")
+            else:
+                raise Exception(f"Error al descargar el audio de YouTube: {str(e)}")
 
     def transcribe(self, input_path, is_youtube_url=False):
         """
