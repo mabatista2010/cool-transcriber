@@ -11,62 +11,60 @@ st.set_page_config(
     layout="wide"
 )
 
-def main():
-    st.title("🎙️ Audio to Text Transcription")
+st.title("🎙️ Audio to Text Transcription")
 
-    # Sidebar with supported formats
-    st.sidebar.header("Formatos Soportados")
-    supported_formats = get_supported_formats()
-    st.sidebar.write(", ".join(supported_formats))
+# Sidebar with supported formats
+st.sidebar.header("Formatos Soportados")
+supported_formats = get_supported_formats()
+st.sidebar.write(", ".join(supported_formats))
 
-    # File upload
-    uploaded_file = st.file_uploader(
-        "Sube tu archivo de audio",
-        type=supported_formats,
-        help="Sube un archivo de audio para transcribir"
-    )
+# File upload
+uploaded_file = st.file_uploader(
+    "Sube tu archivo de audio",
+    type=supported_formats,
+    help="Sube un archivo de audio para transcribir"
+)
 
-    if uploaded_file is not None:
-        # Create a temporary file to store the uploaded audio
-        with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(uploaded_file.name)[1]) as tmp_file:
-            tmp_file.write(uploaded_file.getvalue())
-            audio_path = tmp_file.name
+if uploaded_file is not None:
+    # Create a temporary file to store the uploaded audio
+    with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(uploaded_file.name)[1]) as tmp_file:
+        tmp_file.write(uploaded_file.getvalue())
+        audio_path = tmp_file.name
 
-        try:
-            # Initialize transcriber
-            transcriber = AudioTranscriber()
+    try:
+        # Initialize transcriber and process transcription
+        transcriber = AudioTranscriber()
+        transcription = transcriber.transcribe(audio_path)
 
-            # Process transcription
-            transcription = transcriber.transcribe(audio_path)
+        # Display transcription
+        st.markdown("### Transcripción")
+        st.text_area(
+            "Texto transcrito",
+            value=transcription,
+            height=300,
+            key="transcription"
+        )
 
-            # Display transcription
-            st.markdown("### Transcripción")
-            st.text_area(
-                "Texto transcrito",
-                value=transcription,
-                height=300,
-                key="transcription"
-            )
-
-            # Copy button
-            if st.button("📋 Copiar"):
+        # Copy button
+        if st.button("📋 Copiar", key="copy_btn"):
+            try:
                 pyperclip.copy(transcription)
-                st.success("¡Texto copiado al portapapeles!")
+                st.success("¡Texto copiado!")
+            except Exception as e:
+                st.error(f"Error al copiar: {str(e)}")
 
-            # Download button
-            st.download_button(
-                label="⬇️ Descargar Transcripción",
-                data=transcription,
-                file_name="transcripcion.txt",
-                mime="text/plain"
-            )
+        # Download button
+        st.download_button(
+            label="⬇️ Descargar Transcripción",
+            data=transcription,
+            file_name="transcripcion.txt",
+            mime="text/plain"
+        )
 
-        except Exception as e:
-            st.error(f"Ocurrió un error: {str(e)}")
+    except Exception as e:
+        st.error(f"Ocurrió un error: {str(e)}")
 
-        finally:
-            # Clean up temporary file
+    finally:
+        # Clean up temporary file
+        if os.path.exists(audio_path):
             os.unlink(audio_path)
-
-if __name__ == "__main__":
-    main()
