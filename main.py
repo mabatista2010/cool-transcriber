@@ -140,7 +140,17 @@ def main():
                         st.markdown("<div class='summary-container'>", unsafe_allow_html=True)
 
                         st.subheader("🔍 Summary")
-                        st.write(summary_data['resumen'])
+                        summary_text = f"""RESUMEN DE LA TRANSCRIPCIÓN
+
+🔍 RESUMEN:
+{summary_data['resumen']}
+
+📌 PUNTOS CLAVE:
+"""
+                        for i, punto in enumerate(summary_data['puntos_clave'], 1):
+                            summary_text += f"{i}. {punto}\n"
+
+                        st.write(summary_text)
 
                         st.subheader("📌 Key Points")
                         st.markdown("<ul class='key-points'>", unsafe_allow_html=True)
@@ -151,9 +161,9 @@ def main():
                         # Botón para descargar el resumen
                         st.download_button(
                             label="📥 Download Summary",
-                            data=summary_json,
-                            file_name="summary.json",
-                            mime="application/json"
+                            data=summary_text,
+                            file_name="summary.txt",
+                            mime="text/plain"
                         )
 
                         st.markdown("</div>", unsafe_allow_html=True)
