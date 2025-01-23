@@ -70,20 +70,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-def clear_state():
-    """Clear all session state variables"""
-    for key in list(st.session_state.keys()):
-        del st.session_state[key]
-
 def main():
     st.title("🎙️ Audio to Text Transcription")
-
-    # Botón para nueva transcripción
-    col1, col2 = st.columns([6, 1])
-    with col2:
-        if st.button("🔄 Nueva transcripción"):
-            clear_state()
-            st.experimental_rerun()
 
     # File upload
     uploaded_file = st.file_uploader(
@@ -147,44 +135,40 @@ def main():
                 try:
                     summary_data = json.loads(summary_json)
 
-                    # Guardar el resumen en el estado de la sesión
-                    st.session_state.summary_data = summary_data
-                    st.session_state.summary_text = f"""RESUMEN DE LA TRANSCRIPCIÓN
+                    # Mostrar el resumen en un nuevo expander
+                    with st.expander("📋 AI Summary", expanded=True):
+                        st.markdown("<div class='summary-container'>", unsafe_allow_html=True)
+
+                        st.subheader("🔍 Summary")
+                        summary_text = f"""RESUMEN DE LA TRANSCRIPCIÓN
 
 🔍 RESUMEN:
 {summary_data['resumen']}
 
 📌 PUNTOS CLAVE:
 """
-                    for i, punto in enumerate(summary_data['puntos_clave'], 1):
-                        st.session_state.summary_text += f"{i}. {punto}\n"
+                        for i, punto in enumerate(summary_data['puntos_clave'], 1):
+                            summary_text += f"{i}. {punto}\n"
 
+                        st.write(summary_text)
+
+                        st.subheader("📌 Key Points")
+                        st.markdown("<ul class='key-points'>", unsafe_allow_html=True)
+                        for punto in summary_data['puntos_clave']:
+                            st.markdown(f"<li>{punto}</li>", unsafe_allow_html=True)
+                        st.markdown("</ul>", unsafe_allow_html=True)
+
+                        # Botón para descargar el resumen
+                        st.download_button(
+                            label="📥 Download Summary",
+                            data=summary_text,
+                            file_name="summary.txt",
+                            mime="text/plain"
+                        )
+
+                        st.markdown("</div>", unsafe_allow_html=True)
                 except json.JSONDecodeError:
                     st.error("Error processing the summary response. Please try again.")
-
-            # Mostrar el resumen si existe en el estado de la sesión
-            if 'summary_data' in st.session_state:
-                with st.expander("📋 AI Summary", expanded=True):
-                    st.markdown("<div class='summary-container'>", unsafe_allow_html=True)
-
-                    st.subheader("🔍 Summary")
-                    st.write(st.session_state.summary_text)
-
-                    st.subheader("📌 Key Points")
-                    st.markdown("<ul class='key-points'>", unsafe_allow_html=True)
-                    for punto in st.session_state.summary_data['puntos_clave']:
-                        st.markdown(f"<li>{punto}</li>", unsafe_allow_html=True)
-                    st.markdown("</ul>", unsafe_allow_html=True)
-
-                    # Botón para descargar el resumen
-                    st.download_button(
-                        label="📥 Download Summary",
-                        data=st.session_state.summary_text,
-                        file_name="summary.txt",
-                        mime="text/plain"
-                    )
-
-                    st.markdown("</div>", unsafe_allow_html=True)
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
