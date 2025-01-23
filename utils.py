@@ -19,10 +19,11 @@ def format_transcription(text):
             messages=[
                 {
                     "role": "system",
-                    "content": "Analiza el siguiente texto transcrito e identifica cuando hablan diferentes personas. "
-                    "Etiqueta cada intervención con 'Persona 1:', 'Persona 2:', etc., basándote en cambios en el "
-                    "hablante. Mantén el contenido exactamente igual, solo agrega las etiquetas de los hablantes "
-                    "y mejora el formato para mayor legibilidad. Si no hay cambios claros de hablante, no agregues etiquetas."
+                    "content": "Analiza el siguiente texto transcrito. Primero, determina si hay evidencia clara "
+                    "de múltiples personas hablando (por ejemplo, diálogo, diferentes puntos de vista o estilos de habla). "
+                    "Si y SOLO SI detectas múltiples hablantes con certeza, etiqueta cada intervención con 'Persona 1:', "
+                    "'Persona 2:', etc. Si no hay evidencia clara de múltiples hablantes, simplemente mejora el formato "
+                    "y la legibilidad del texto sin agregar etiquetas. Mantén el contenido exactamente igual."
                 },
                 {"role": "user", "content": text}
             ],
