@@ -5,6 +5,30 @@ import json
 from audio_processor import AudioTranscriber
 from utils import get_supported_formats, format_transcription, generate_summary
 
+# PWA Metadata and Service Worker
+st.markdown("""
+    <head>
+        <link rel="manifest" href="/static/manifest.json">
+        <meta name="theme-color" content="#f0f2f6">
+        <link rel="apple-touch-icon" href="/static/icon-192x192.png">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('/static/sw.js')
+                        .then(function(registration) {
+                            console.log('ServiceWorker registration successful');
+                        })
+                        .catch(function(err) {
+                            console.log('ServiceWorker registration failed: ', err);
+                        });
+                });
+            }
+        </script>
+    </head>
+""", unsafe_allow_html=True)
+
 # Configuración de la página
 st.set_page_config(
     page_title="Audio Transcription App",
@@ -42,12 +66,6 @@ st.markdown("""
     }
     .key-points li {
         margin-bottom: 8px;
-    }
-    .new-transcription-button {
-        display: flex;
-        justify-content: center;
-        margin-top: 1rem;
-        margin-bottom: 2rem;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -167,13 +185,6 @@ def main():
         finally:
             # Limpiar archivo temporal
             os.unlink(audio_path)
-
-    # Botón para nueva transcripción centrado
-    st.markdown("<div class='new-transcription-button'>", unsafe_allow_html=True)
-    if st.button("🔁 Nueva transcripción", use_container_width=False):
-        clear_state()
-        st.experimental_rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
