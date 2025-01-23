@@ -9,7 +9,7 @@ def get_supported_formats():
 
 def format_transcription(text):
     """
-    Format transcribed text using OpenAI for better presentation.
+    Format transcribed text using OpenAI for better presentation and speaker detection.
     """
     try:
         client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
@@ -19,8 +19,10 @@ def format_transcription(text):
             messages=[
                 {
                     "role": "system",
-                    "content": "Formatea y organiza el siguiente texto transcrito para mejorar su legibilidad. "
-                    "NO agregues ni modifiques el contenido, solo mejora su presentación y estructura."
+                    "content": "Analiza el siguiente texto transcrito e identifica cuando hablan diferentes personas. "
+                    "Etiqueta cada intervención con 'Persona 1:', 'Persona 2:', etc., basándote en cambios en el "
+                    "hablante. Mantén el contenido exactamente igual, solo agrega las etiquetas de los hablantes "
+                    "y mejora el formato para mayor legibilidad. Si no hay cambios claros de hablante, no agregues etiquetas."
                 },
                 {"role": "user", "content": text}
             ],
