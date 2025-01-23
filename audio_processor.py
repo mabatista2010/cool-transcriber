@@ -3,10 +3,7 @@ from openai import OpenAI
 
 class AudioTranscriber:
     def __init__(self):
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            raise ValueError("Error: No se encontró la API key de OpenAI")
-        self.client = OpenAI(api_key=api_key)
+        self.client = OpenAI()
 
     def transcribe(self, audio_path):
         """
@@ -25,8 +22,8 @@ class AudioTranscriber:
 
         except Exception as e:
             if "API key" in str(e):
-                raise ValueError("Error de API: Verifica tu API key de OpenAI")
+                raise Exception("Error de API: Verifica tu API key de OpenAI")
             elif "file format" in str(e).lower():
-                raise ValueError("Formato de archivo no soportado")
+                raise Exception("Formato de archivo no soportado")
             else:
-                raise ValueError(f"Error durante la transcripción: {str(e)}")
+                raise Exception(f"Error durante la transcripción: {str(e)}")
