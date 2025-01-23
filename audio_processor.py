@@ -18,7 +18,7 @@ class AudioTranscriber:
                     file=audio_file,
                     response_format="text"
                 )
-                return self.format_transcription(response.text)
+                return self.format_transcription(response)
 
         except Exception as e:
             if "API key" in str(e):
@@ -28,11 +28,15 @@ class AudioTranscriber:
             else:
                 raise Exception(f"Error durante la transcripción: {str(e)}")
 
-    def format_transcription(self, text):
+    def format_transcription(self, response):
         """
         Format the transcription using OpenAI to improve readability.
         """
         try:
+            if isinstance(response, str):
+                text = response
+            else:
+                text = response["text"]
             response = self.client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
