@@ -35,15 +35,10 @@ st.markdown("""
 def main():
     st.title("🎙️ Audio to Text Transcription")
 
-    # Sidebar con formatos soportados
-    st.sidebar.header("Supported Formats")
-    supported_formats = get_supported_formats()
-    st.sidebar.write(", ".join(supported_formats))
-
     # File upload
     uploaded_file = st.file_uploader(
         "Upload your audio file",
-        type=supported_formats,
+        type=get_supported_formats(),
         help="Upload an audio file to transcribe"
     )
 
