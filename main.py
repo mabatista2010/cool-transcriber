@@ -35,41 +35,30 @@ def main():
             # Initialize transcriber
             transcriber = AudioTranscriber()
 
-            # Add progress bar
-            progress_bar = st.progress(0)
-            status_text = st.empty()
-
             # Process transcription
-            status_text.text("Procesando archivo de audio...")
-            progress_bar.progress(25)
-
             transcription = transcriber.transcribe(audio_path)
-            progress_bar.progress(100)
-            status_text.text("¡Transcripción completada!")
 
-            # Display results in tabs
-            tab1, tab2 = st.tabs(["📝 Previsualización", "📋 Texto Completo"])
+            # Display transcription
+            st.markdown("### Transcripción")
+            st.text_area(
+                "Texto transcrito",
+                value=transcription,
+                height=300,
+                key="transcription"
+            )
 
-            with tab1:
-                st.markdown("### Previsualización")
-                preview_length = min(500, len(transcription))
-                st.markdown(transcription[:preview_length] + ("..." if len(transcription) > 500 else ""))
+            col1, col2 = st.columns([1, 4])
+            with col1:
+                # Copy button without JavaScript
+                st.button("📋 Copiar", key="copy", help="Copiar texto al portapapeles")
+                if st.session_state.get("copy"):
+                    st.session_state["copy"] = False
+                    st.session_state["copied"] = True
 
-            with tab2:
-                st.markdown("### Transcripción Completa")
-                st.text_area(
-                    "Texto transcrito",
-                    value=transcription,
-                    height=300,
-                    key="transcription"
-                )
-
-                # Copy button
-                if st.button("📋 Copiar al Portapapeles"):
-                    st.write('<script>navigator.clipboard.writeText(`' + 
-                            transcription.replace('`', '\\`') + 
-                            '`);</script>', unsafe_allow_html=True)
+            with col2:
+                if st.session_state.get("copied", False):
                     st.success("¡Texto copiado al portapapeles!")
+                    st.session_state["copied"] = False
 
             # Download button
             st.download_button(
