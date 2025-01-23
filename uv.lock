@@ -787,6 +787,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "openai" },
+    { name = "pillow" },
     { name = "pydub" },
     { name = "speechrecognition" },
     { name = "streamlit" },
@@ -795,6 +796,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "openai", specifier = ">=1.60.0" },
+    { name = "pillow", specifier = ">=11.1.0" },
     { name = "pydub", specifier = ">=0.25.1" },
     { name = "speechrecognition", specifier = ">=3.14.0" },
     { name = "streamlit", specifier = ">=1.41.1" },

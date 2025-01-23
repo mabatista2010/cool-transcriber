@@ -1,0 +1,21 @@
+{
+  "name": "Audio Transcription App",
+  "short_name": "Transcriber",
+  "description": "Aplicación de transcripción de audio a texto usando IA",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f0f2f6",
+  "icons": [
+    {
+      "src": "icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
