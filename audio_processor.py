@@ -8,14 +8,14 @@ class AudioTranscriber:
     def transcribe(self, audio_path):
         """
         Transcribe audio file to text using OpenAI Whisper API.
+        Auto-detects the language of the audio.
         """
         try:
             with open(audio_path, "rb") as audio_file:
-                # Use Whisper API to transcribe
+                # Use Whisper API to transcribe with auto language detection
                 response = self.client.audio.transcriptions.create(
                     model="whisper-1",
                     file=audio_file,
-                    language="es",
                     response_format="text"
                 )
                 return response
