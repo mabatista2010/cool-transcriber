@@ -42,10 +42,13 @@ class AudioTranscriber:
             if "429" in str(e):
                 raise Exception("Demasiadas solicitudes a YouTube. Por favor, intenta más tarde.")
             elif "403" in str(e):
-                raise Exception("No se puede acceder al video. Asegúrate que el video sea público y accesible.")
+                raise Exception("No se puede acceder al video. Asegúrate que:\n1. El video sea público\n2. La URL sea correcta\n3. El video no esté restringido en tu región")
             elif "age restricted" in str(e).lower():
                 raise Exception("El video tiene restricción de edad y no puede ser procesado.")
+            elif "Video unavailable" in str(e):
+                raise Exception("El video no está disponible. Verifica que la URL sea correcta y el video exista.")
             else:
+                print(f"Error detallado: {str(e)}")
                 raise Exception(f"Error al descargar el audio de YouTube: {str(e)}")
 
     def transcribe(self, input_path, is_youtube_url=False):
