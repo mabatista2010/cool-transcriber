@@ -1,8 +1,9 @@
 import streamlit as st
 import os
 import tempfile
+import json
 from audio_processor import AudioTranscriber
-from utils import get_supported_formats, format_transcription
+from utils import get_supported_formats, format_transcription, generate_summary
 
 # Configuración de la página
 st.set_page_config(
@@ -53,6 +54,19 @@ st.markdown("""
         line-height: 1.6;
         font-size: 16px;
     }
+    .summary-container {
+        background-color: #e6f3ff;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 10px 0;
+    }
+    .key-points {
+        margin-top: 15px;
+        padding-left: 20px;
+    }
+    .key-points li {
+        margin-bottom: 8px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -85,8 +99,19 @@ def main():
             progress_bar.progress(25)
 
             transcription = transcriber.transcribe(audio_path)
+            progress_bar.progress(75)
+
+            # Generar resumen si el usuario lo solicita
+            generate_summary_option = st.checkbox("Generate AI Summary", value=False)
+
+            if generate_summary_option:
+                status_text.text("Generating summary...")
+                summary_json = generate_summary(transcription)
+                summary_data = json.loads(summary_json)
+                progress_bar.progress(90)
+
             progress_bar.progress(100)
-            status_text.text("Transcription completed!")
+            status_text.text("Processing completed!")
 
             # Modal con la transcripción
             with st.expander("📝 View Transcription", expanded=True):
@@ -111,6 +136,30 @@ def main():
                 st.markdown("</div>", unsafe_allow_html=True)
 
                 st.markdown("</div>", unsafe_allow_html=True)
+
+            # Mostrar resumen si fue generado
+            if generate_summary_option and 'summary_data' in locals():
+                with st.expander("📋 AI Summary", expanded=True):
+                    st.markdown("<div class='summary-container'>", unsafe_allow_html=True)
+
+                    st.subheader("🔍 Summary")
+                    st.write(summary_data['resumen'])
+
+                    st.subheader("📌 Key Points")
+                    st.markdown("<ul class='key-points'>", unsafe_allow_html=True)
+                    for punto in summary_data['puntos_clave']:
+                        st.markdown(f"<li>{punto}</li>", unsafe_allow_html=True)
+                    st.markdown("</ul>", unsafe_allow_html=True)
+
+                    # Botón para descargar el resumen
+                    st.download_button(
+                        label="📥 Download Summary",
+                        data=summary_json,
+                        file_name="summary.json",
+                        mime="application/json"
+                    )
+
+                    st.markdown("</div>", unsafe_allow_html=True)
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
