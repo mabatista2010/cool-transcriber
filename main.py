@@ -127,38 +127,38 @@ def main():
                 st.markdown("</div>", unsafe_allow_html=True)
                 st.markdown("</div>", unsafe_allow_html=True)
 
-                # Botón para generar resumen al final de la transcripción
-                if st.button("🤖 Generate AI Summary"):
-                    status_text.text("Generating summary...")
-                    summary_json = generate_summary(transcription)
+            # Botón para generar resumen al final de la transcripción
+            if st.button("🤖 Generate AI Summary"):
+                status_text.text("Generating summary...")
+                summary_json = generate_summary(transcription)
 
-                    try:
-                        summary_data = json.loads(summary_json)
+                try:
+                    summary_data = json.loads(summary_json)
 
-                        # Mostrar el resumen en un nuevo expander
-                        with st.expander("📋 AI Summary", expanded=True):
-                            st.markdown("<div class='summary-container'>", unsafe_allow_html=True)
+                    # Mostrar el resumen en un nuevo expander
+                    with st.expander("📋 AI Summary", expanded=True):
+                        st.markdown("<div class='summary-container'>", unsafe_allow_html=True)
 
-                            st.subheader("🔍 Summary")
-                            st.write(summary_data['resumen'])
+                        st.subheader("🔍 Summary")
+                        st.write(summary_data['resumen'])
 
-                            st.subheader("📌 Key Points")
-                            st.markdown("<ul class='key-points'>", unsafe_allow_html=True)
-                            for punto in summary_data['puntos_clave']:
-                                st.markdown(f"<li>{punto}</li>", unsafe_allow_html=True)
-                            st.markdown("</ul>", unsafe_allow_html=True)
+                        st.subheader("📌 Key Points")
+                        st.markdown("<ul class='key-points'>", unsafe_allow_html=True)
+                        for punto in summary_data['puntos_clave']:
+                            st.markdown(f"<li>{punto}</li>", unsafe_allow_html=True)
+                        st.markdown("</ul>", unsafe_allow_html=True)
 
-                            # Botón para descargar el resumen
-                            st.download_button(
-                                label="📥 Download Summary",
-                                data=summary_json,
-                                file_name="summary.json",
-                                mime="application/json"
-                            )
+                        # Botón para descargar el resumen
+                        st.download_button(
+                            label="📥 Download Summary",
+                            data=summary_json,
+                            file_name="summary.json",
+                            mime="application/json"
+                        )
 
-                            st.markdown("</div>", unsafe_allow_html=True)
-                    except json.JSONDecodeError:
-                        st.error("Error processing the summary response. Please try again.")
+                        st.markdown("</div>", unsafe_allow_html=True)
+                except json.JSONDecodeError:
+                    st.error("Error processing the summary response. Please try again.")
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
