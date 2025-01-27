@@ -15,21 +15,62 @@ def download_youtube_audio(url):
     Returns the path to the downloaded audio file.
     """
     try:
+        # Validar el formato de la URL
+        if not url.startswith('http'):
+            raise Exception("URL inválida. Debe comenzar con http:// o https://")
+
         # Crear directorio temporal si no existe
         temp_dir = tempfile.gettempdir()
 
-        # Descargar audio
-        yt = YouTube(url)
-        audio_stream = yt.streams.filter(only_audio=True).first()
+        print(f"Intentando descargar video de: {url}")  # Debug info
 
-        # Descargar en archivo temporal
+        # Intentar crear objeto YouTube con más opciones
+        yt = YouTube(
+            url,
+            use_oauth=False,
+            allow_oauth_cache=True
+        )
+
+        print(f"Título del video: {yt.title}")  # Debug info
+        print(f"Duración: {yt.length} segundos")  # Debug info
+
+        # Obtener el stream de audio
+        print("Buscando stream de audio...")  # Debug info
+        audio_stream = yt.streams.filter(only_audio=True, file_extension='mp4').first()
+
+        if not audio_stream:
+            raise Exception("No se encontró un stream de audio compatible")
+
+        print(f"Stream seleccionado: {audio_stream}")  # Debug info
+
+        # Generar nombre único para el archivo temporal
         temp_file = os.path.join(temp_dir, f"yt_audio_{os.urandom(4).hex()}.mp4")
+
+        print(f"Descargando audio a: {temp_file}")  # Debug info
+        # Descargar el audio
         audio_stream.download(filename=temp_file)
 
+        if not os.path.exists(temp_file):
+            raise Exception("El archivo no se descargó correctamente")
+
+        print("Descarga completada exitosamente")  # Debug info
         return temp_file, yt.title
 
     except Exception as e:
-        raise Exception(f"Error descargando audio de YouTube: {str(e)}")
+        error_msg = str(e)
+        if "403" in error_msg:
+            raise Exception(
+                "Error 403: YouTube está bloqueando la descarga. "
+                "Esto puede deberse a restricciones del video o límites de rate. "
+                "Por favor, intenta con otro video o espera unos minutos."
+            )
+        elif "Video unavailable" in error_msg:
+            raise Exception(
+                "El video no está disponible. "
+                "Verifica que el video exista y sea público."
+            )
+        else:
+            raise Exception(f"Error descargando audio de YouTube: {error_msg}")
 
 def generate_summary(text):
     """
