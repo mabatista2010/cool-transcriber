@@ -1,0 +1,21 @@
+{
+    "name": "Audio Transcriber",
+    "short_name": "Transcriber",
+    "description": "Transcribe audio files to text and generate summaries",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f0f2f6",
+    "theme_color": "#f0f2f6",
+    "icons": [
+        {
+            "src": "/static/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+} 

@@ -1,11 +1,18 @@
+import openai
 import os
-from openai import OpenAI
+from dotenv import load_dotenv
+
+# Cargar variables de entorno
+load_dotenv()
+
+# Configurar OpenAI API key
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
 def get_supported_formats():
     """
     Return list of supported audio formats by OpenAI Whisper.
     """
-    return ['mp3', 'mp4', 'mpeg', 'mpga', 'm4a', 'wav', 'webm']
+    return ['wav', 'mp3', 'ogg', 'm4a', 'flac']
 
 def generate_summary(text):
     """
@@ -13,36 +20,41 @@ def generate_summary(text):
     Returns both a short summary and key points.
     """
     try:
-        client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+        prompt = f"""Por favor, analiza el siguiente texto y proporciona:
+1. Un resumen conciso
+2. Los puntos clave más importantes (máximo 5)
 
-        response = client.chat.completions.create(
-            model="gpt-4o-mini-2024-07-18",
+Formato de respuesta requerido (JSON):
+{{
+    "resumen": "El resumen aquí",
+    "puntos_clave": [
+        "Punto 1",
+        "Punto 2",
+        etc.
+    ]
+}}
+
+Texto a analizar:
+{text}"""
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
             messages=[
-                {
-                    "role": "system",
-                    "content": "Analiza el siguiente texto transcrito y proporciona:"
-                    "\n1. Un resumen conciso (máximo 3 párrafos)"
-                    "\n2. Los puntos clave más importantes (máximo 5 puntos)"
-                    "\nResponde en formato JSON con las claves 'resumen' y 'puntos_clave'"
-                },
-                {"role": "user", "content": text}
-            ],
-            response_format={"type": "json_object"},
-            temperature=0.7,
-            max_tokens=1000
+                {"role": "system", "content": "Eres un asistente experto en análisis y resumen de texto."},
+                {"role": "user", "content": prompt}
+            ]
         )
 
         return response.choices[0].message.content
-
     except Exception as e:
-        return {"error": f"Error generando el resumen: {str(e)}"}
+        raise Exception(f"Error generating summary: {str(e)}")
 
 def format_transcription(text):
     """
     Format transcribed text using OpenAI for better presentation and speaker detection.
     """
     try:
-        client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+        client = openai.OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
         response = client.chat.completions.create(
             model="gpt-4o-mini-2024-07-18",
