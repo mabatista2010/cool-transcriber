@@ -1,8 +1,8 @@
 import os
+import re
 from openai import OpenAI
 from pytube import YouTube
 import tempfile
-import re
 
 def get_supported_formats():
     """
@@ -40,22 +40,25 @@ def download_youtube_audio(url):
 
         # Intentar crear objeto YouTube con más opciones y reintentos
         max_retries = 3
+        yt = None
+        last_error = None
+
         for attempt in range(max_retries):
             try:
-                yt = YouTube(
-                    url,
-                    use_oauth=False,
-                    allow_oauth_cache=True
-                )
-                # Forzar la carga del título para verificar la conexión
-                video_title = yt.title
-                print(f"Título del video: {video_title}")
+                yt = YouTube(url)
+                # Intentar acceder a propiedades básicas para verificar la conexión
+                _ = yt.streams
                 break
             except Exception as e:
-                if attempt == max_retries - 1:
-                    raise Exception(f"No se pudo acceder al video después de {max_retries} intentos: {str(e)}")
-                print(f"Intento {attempt + 1} fallido, reintentando...")
-                continue
+                last_error = str(e)
+                print(f"Intento {attempt + 1} fallido: {last_error}")
+                if attempt < max_retries - 1:
+                    continue
+                else:
+                    raise Exception(f"No se pudo acceder al video después de {max_retries} intentos")
+
+        if not yt:
+            raise Exception("No se pudo inicializar el objeto YouTube")
 
         # Obtener el stream de audio
         print("Buscando stream de audio...")
@@ -74,7 +77,7 @@ def download_youtube_audio(url):
             raise Exception("El archivo no se descargó correctamente")
 
         print("Descarga completada exitosamente")
-        return temp_file, yt.title
+        return temp_file, "YouTube Audio"  # Retornamos un título genérico para evitar errores
 
     except Exception as e:
         error_msg = str(e)
@@ -86,7 +89,6 @@ def download_youtube_audio(url):
         elif "403" in error_msg:
             raise Exception(
                 "Error 403: YouTube está bloqueando la descarga. "
-                "Esto puede deberse a restricciones del video o límites de rate. "
                 "Por favor, intenta con otro video o espera unos minutos."
             )
         elif "Video unavailable" in error_msg or "Video is unavailable" in error_msg:
