@@ -1,11 +1,35 @@
 import os
 from openai import OpenAI
+from pytube import YouTube
+import tempfile
 
 def get_supported_formats():
     """
     Return list of supported audio formats by OpenAI Whisper.
     """
     return ['mp3', 'mp4', 'mpeg', 'mpga', 'm4a', 'wav', 'webm']
+
+def download_youtube_audio(url):
+    """
+    Download audio from YouTube video.
+    Returns the path to the downloaded audio file.
+    """
+    try:
+        # Crear directorio temporal si no existe
+        temp_dir = tempfile.gettempdir()
+
+        # Descargar audio
+        yt = YouTube(url)
+        audio_stream = yt.streams.filter(only_audio=True).first()
+
+        # Descargar en archivo temporal
+        temp_file = os.path.join(temp_dir, f"yt_audio_{os.urandom(4).hex()}.mp4")
+        audio_stream.download(filename=temp_file)
+
+        return temp_file, yt.title
+
+    except Exception as e:
+        raise Exception(f"Error descargando audio de YouTube: {str(e)}")
 
 def generate_summary(text):
     """
